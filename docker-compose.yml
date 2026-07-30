@@ -1,0 +1,60 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: chatsphere
+      POSTGRES_PASSWORD: chatsphere
+      POSTGRES_DB: chatsphere
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U chatsphere']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+
+  server:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    restart: unless-stopped
+    ports:
+      - '4000:4000'
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://chatsphere:chatsphere@postgres:5432/chatsphere?schema=public
+      CLIENT_URL: http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:4000/api
+        NEXT_PUBLIC_SOCKET_URL: http://localhost:4000
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    depends_on:
+      - server
+
+volumes:
+  postgres_data:
+  redis_data:

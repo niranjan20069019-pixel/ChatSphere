@@ -1,0 +1,12 @@
+node_modules
+dist
+.next
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+coverage
+.turbo
+.pgdata
+apps/server/prisma/migrations/**/migration_lock.toml

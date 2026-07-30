@@ -1,0 +1,22 @@
+{
+  "name": "chatsphere",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w @chatsphere/server\" \"npm run dev -w @chatsphere/web\"",
+    "dev:server": "npm run dev -w @chatsphere/server",
+    "dev:web": "npm run dev -w @chatsphere/web",
+    "build": "npm run build -w @chatsphere/server && npm run build -w @chatsphere/web",
+    "db:start": "bash scripts/start-db.sh",
+    "db:generate": "npm run db:generate -w @chatsphere/server",
+    "db:migrate": "npm run db:migrate -w @chatsphere/server",
+    "db:push": "npm run db:push -w @chatsphere/server",
+    "db:seed": "npm run db:seed -w @chatsphere/server",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
