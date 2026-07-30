@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f5f5f0;
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-border: #e8e8e3;
+  --muted: #8e8e93;
+  --accent: #f5dd42;
+  --accent-foreground: #1a1a1a;
+  --bubble-me: #f5dd42;
+  --bubble-me-text: #1a1a1a;
+  --bubble-them: #ffffff;
+  --bubble-them-text: #1a1a1a;
+  --danger: #ff3b30;
+  --success: #34c759;
+  --nav-bg: rgba(255, 255, 255, 0.92);
+  --overlay: rgba(0, 0, 0, 0.4);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+@layer components {
+  .glass {
+    @apply backdrop-blur-xl border;
+    background: var(--card);
+    border-color: var(--card-border);
+  }
+
+  .card-rounded {
+    @apply rounded-2xl bg-white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+
+  .message-bubble-me {
+    @apply rounded-[18px] rounded-br-[4px] px-4 py-2.5 text-sm leading-relaxed;
+    background: var(--bubble-me);
+    color: var(--bubble-me-text);
+  }
+
+  .message-bubble-them {
+    @apply rounded-[18px] rounded-bl-[4px] px-4 py-2.5 text-sm leading-relaxed;
+    background: var(--bubble-them);
+    color: var(--bubble-them-text);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+
+  .bottom-sheet {
+    @apply fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl bg-white px-4 pb-8 pt-2 shadow-2xl;
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .bottom-sheet-overlay {
+    @apply fixed inset-0 z-40 bg-black/40;
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  .fab-button {
+    @apply flex items-center gap-2 rounded-full bg-[#1a1a1a] px-5 py-3 text-sm font-semibold text-white shadow-xl transition hover:bg-[#333] active:scale-95;
+  }
+
+  .stories-scroll {
+    @apply flex gap-4 overflow-x-auto pb-2;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .stories-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .story-ring {
+    @apply rounded-full p-[2px];
+    background: conic-gradient(#f5dd42, #ff9500, #f5dd42);
+  }
+
+  .story-ring-seen {
+    @apply rounded-full p-[2px];
+    background: #d1d1d6;
+  }
+
+  .chat-item {
+    @apply flex items-center gap-3 px-4 py-3 transition hover:bg-black/[0.02] active:bg-black/[0.04];
+  }
+
+  .bottom-nav-btn {
+    @apply flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] font-medium transition;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-[#1a1a1a] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#333] disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-black/[0.04] px-4 py-2.5 text-sm font-medium text-[#1a1a1a] transition hover:bg-black/[0.08] disabled:opacity-50;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-[var(--muted)] transition hover:bg-black/[0.04] hover:text-[#1a1a1a] disabled:opacity-50;
+  }
+
+  .input-field {
+    @apply block w-full rounded-xl border border-[var(--card-border)] bg-white px-3 py-2.5 text-sm text-[#1a1a1a] outline-none transition placeholder:text-[var(--muted)] focus:border-[#1a1a1a]/30 focus:ring-1 focus:ring-[#1a1a1a]/10;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% {
+      opacity: 0.4;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+}
