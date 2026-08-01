@@ -11,7 +11,10 @@ import apiRoutes from './routes/api';
 import { setupSocketIO } from './sockets';
 
 const app = express();
-const server = http.createServer(app);
+const isVercelRuntime = process.env.VERCEL === '1' || Boolean(process.env.VERCEL_URL);
+
+let server: http.Server | null = null;
+let io: ReturnType<typeof setupSocketIO> | null = null;
 
 app.set('trust proxy', 1);
 
@@ -39,26 +42,30 @@ app.use('/api', apiRoutes);
 
 app.use(errorHandler);
 
-const io = setupSocketIO(server);
+if (!isVercelRuntime) {
+  server = http.createServer(app);
+  io = setupSocketIO(server);
 
-server.listen(env.PORT, () => {
-  logger.info(`ChatSphere API running on port ${env.PORT} [${env.NODE_ENV}]`);
-  logger.info(`Client URL: ${env.CLIENT_URL}`);
-});
-
-const shutdown = (signal: string) => {
-  logger.info(`Received ${signal}, shutting down gracefully...`);
-  server.close(() => {
-    io.close();
-    process.exit(0);
+  server.listen(env.PORT, () => {
+    logger.info(`ChatSphere API running on port ${env.PORT} [${env.NODE_ENV}]`);
+    logger.info(`Client URL: ${env.CLIENT_URL}`);
   });
-  setTimeout(() => {
-    logger.error('Forced shutdown after 10s timeout');
-    process.exit(1);
-  }, 10000).unref();
-};
 
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
+  const shutdown = (signal: string) => {
+    logger.info(`Received ${signal}, shutting down gracefully...`);
+    server?.close(() => {
+      io?.close();
+      process.exit(0);
+    });
+    setTimeout(() => {
+      logger.error('Forced shutdown after 10s timeout');
+      process.exit(1);
+    }, 10000).unref();
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+}
 
 export { app, server, io };
+export default app;
