@@ -159,28 +159,58 @@ See `.env.example` for the full list. Important ones:
 ```bash
 cp .env.example .env
 # Edit secrets as needed
-docker compose up --build
+docker compose up --build -d
 ```
 
 - Web: http://localhost:3000  
-- API: http://localhost:4000  
+- API: http://localhost:4000 (health: `/api/health`)
 
-Run migrations/seed against the compose Postgres if needed:
+`docker compose up` waits for PostgreSQL to be healthy, applies `prisma migrate deploy` automatically before the API boots, and runs each container as a non-root user with healthchecks.
+
+To seed demo accounts against the compose Postgres:
 
 ```bash
-cd apps/server
-DATABASE_URL=postgresql://chatsphere:chatsphere@localhost:5432/chatsphere npm run db:push
-npm run db:seed
+npm run db:generate
+DATABASE_URL=postgresql://chatsphere:chatsphere@localhost:5432/chatsphere?schema=public npm run db:seed
 ```
 
 ## Production Deployment
 
-1. Set strong `JWT_*` secrets and `COOKIE_SECURE=true` (HTTPS required).
-2. Configure Cloudinary and SMTP for real media/email.
-3. Use managed PostgreSQL and run `prisma migrate deploy`.
-4. Deploy `apps/server` (Node) and `apps/web` (Next.js standalone or Vercel).
-5. Point `CLIENT_URL`, `NEXT_PUBLIC_API_URL`, and `NEXT_PUBLIC_SOCKET_URL` at production hosts.
-6. Put the API behind a reverse proxy (nginx/Caddy) with rate limiting and TLS.
+### Option A — Docker Compose (single host)
+
+```bash
+docker compose --env-file .env up --build -d
+```
+
+Set `NODE_ENV=production`, strong `JWT_*` secrets, and `COOKIE_SECURE=true` (HTTPS required) in `.env`.
+
+### Option B — Render (blueprint included)
+
+`render.yaml` provisions a PostgreSQL database plus two web services (API + Next.js). After the first deploy:
+
+1. Create a **migration worker** or run once from the shell:
+
+   ```bash
+   npx prisma migrate deploy --schema apps/server/prisma/schema.prisma
+   ```
+
+   The API service also runs migrations on boot, so the first container start applies them automatically.
+2. Seed demo accounts: `DATABASE_URL=<production-db-url> npm run db:seed`.
+3. Set `SMTP_*` and `CLOUDINARY_*` env vars to enable email and real media uploads.
+
+### Checklist for any platform
+
+1. Strong `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` and `COOKIE_SECURE=true`.
+2. `CLIENT_URL` / `FRONTEND_URL` point at the deployed web origin (CORS + cookies).
+3. `NEXT_PUBLIC_API_URL` / `NEXT_PUBLIC_SOCKET_URL` point at the deployed API (baked in at build time).
+4. Configure Cloudinary and SMTP for real media/email.
+5. Run `prisma migrate deploy` before/at startup against the production database.
+6. Put the API behind a reverse proxy with TLS and rate limiting.
+7. Health check the API at `/api/health` and the web app at `/`.
+
+## CI
+
+`.github/workflows/ci.yml` runs lint + build for both apps on every push/PR.
 
 ## Security Notes
 
@@ -193,4 +223,3 @@ npm run db:seed
 ## License
 
 MIT
-# ChatSphere

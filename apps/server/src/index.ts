@@ -46,4 +46,19 @@ server.listen(env.PORT, () => {
   logger.info(`Client URL: ${env.CLIENT_URL}`);
 });
 
+const shutdown = (signal: string) => {
+  logger.info(`Received ${signal}, shutting down gracefully...`);
+  server.close(() => {
+    io.close();
+    process.exit(0);
+  });
+  setTimeout(() => {
+    logger.error('Forced shutdown after 10s timeout');
+    process.exit(1);
+  }, 10000).unref();
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
 export { app, server, io };
