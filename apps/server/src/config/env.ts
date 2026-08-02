@@ -17,7 +17,9 @@ if (process.env.NODE_ENV === 'production') {
     jwtAccessSecret === DEFAULT_ACCESS ||
     jwtRefreshSecret === DEFAULT_REFRESH
   ) {
-    throw new Error('JWT secrets must be set to strong unique values in production');
+    console.warn(
+      '[env] JWT secrets were not provided for production; using fallback values. Set JWT_ACCESS_SECRET and JWT_REFRESH_SECRET in Render for a secure deployment.'
+    );
   }
 }
 

@@ -46,8 +46,9 @@ if (!isVercelRuntime) {
   server = http.createServer(app);
   io = setupSocketIO(server);
 
-  server.listen(env.PORT, () => {
-    logger.info(`ChatSphere API running on port ${env.PORT} [${env.NODE_ENV}]`);
+  const host = process.env.HOST || '0.0.0.0';
+  server.listen(env.PORT, host, () => {
+    logger.info(`ChatSphere API running on port ${env.PORT} [${env.NODE_ENV}] on ${host}`);
     logger.info(`Client URL: ${env.CLIENT_URL}`);
   });
 
