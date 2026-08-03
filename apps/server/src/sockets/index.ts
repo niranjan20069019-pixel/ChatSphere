@@ -85,7 +85,7 @@ async function requireGroupMember(groupId: string, userId: string) {
 export const setupSocketIO = (httpServer: HttpServer): Server => {
   const io = new Server(httpServer, {
     cors: {
-      origin: env.CLIENT_URL,
+      origin: env.corsOrigins,
       credentials: true,
     },
     pingTimeout: 60000,
