@@ -38,9 +38,31 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(globalLimiter);
 
+app.get('/', (_req, res) => {
+  res.json({
+    success: true,
+    name: 'ChatSphere API',
+    version: '1.0.0',
+    message: 'ChatSphere API is running. See /api/health for status.',
+    endpoints: {
+      health: '/api/health',
+      docs: null,
+    },
+    frontend: env.FRONTEND_URL || env.CLIENT_URL,
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.use('/api', apiRoutes);
 
 app.use(errorHandler);
+
+app.use((_req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found. Available routes are under /api.',
+  });
+});
 
 if (!isVercelRuntime) {
   server = http.createServer(app);
