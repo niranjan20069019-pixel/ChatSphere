@@ -6,7 +6,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "prisma generate && tsc",
     "prestart": "npm run build",
-    "start": "npx prisma migrate deploy --schema prisma/schema.prisma && node dist/index.js",
+    "start": "if [ -n \"$DATABASE_URL\" ]; then npx prisma migrate deploy --schema prisma/schema.prisma; fi && node dist/index.js",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
