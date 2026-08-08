@@ -13,8 +13,8 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY apps/web ./apps/web
-ARG NEXT_PUBLIC_API_URL=https://chatsphere-api.onrender.com/api
-ARG NEXT_PUBLIC_SOCKET_URL=https://chatsphere-api.onrender.com
+ARG NEXT_PUBLIC_API_URL=https://chatsphere-ootu.onrender.com/api
+ARG NEXT_PUBLIC_SOCKET_URL=https://chatsphere-ootu.onrender.com
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_SOCKET_URL=$NEXT_PUBLIC_SOCKET_URL
 RUN npm run build -w @chatsphere/web

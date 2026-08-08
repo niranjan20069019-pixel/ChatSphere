@@ -58,13 +58,18 @@ services:
     plan: free
     region: oregon
     branch: main
+    dockerBuildArgs:
+      - name: NEXT_PUBLIC_API_URL
+        value: "https://chatsphere-ootu.onrender.com/api"
+      - name: NEXT_PUBLIC_SOCKET_URL
+        value: "https://chatsphere-ootu.onrender.com"
     envVars:
       - key: NODE_ENV
         value: "production"
       - key: NEXT_PUBLIC_API_URL
-        value: "https://chatsphere-api.onrender.com/api"
+        value: "https://chatsphere-ootu.onrender.com/api"
       - key: NEXT_PUBLIC_SOCKET_URL
-        value: "https://chatsphere-api.onrender.com"
+        value: "https://chatsphere-ootu.onrender.com"
 
 databases:
   - name: chatsphere-db
