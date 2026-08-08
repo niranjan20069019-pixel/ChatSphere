@@ -8,7 +8,13 @@ const DEFAULT_ACCESS = 'chatsphere-access-secret-change-me';
 const DEFAULT_REFRESH = 'chatsphere-refresh-secret-change-me';
 const PRODUCTION_FRONTEND = 'https://chatsphere-web.onrender.com';
 
+const renderUrl =
+  process.env.RENDER_EXTERNAL_URL ||
+  process.env.RENDER_INSTANCE_URL ||
+  (process.env.RENDER_SERVICE_NAME ? `https://${process.env.RENDER_SERVICE_NAME}.onrender.com` : '');
+
 const clientUrl =
+  renderUrl ||
   process.env.CLIENT_URL ||
   (process.env.NODE_ENV === 'production' ? PRODUCTION_FRONTEND : 'http://localhost:3000');
 

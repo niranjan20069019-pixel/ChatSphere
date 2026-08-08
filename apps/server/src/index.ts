@@ -1,5 +1,7 @@
 import express from 'express';
 import http from 'http';
+import path from 'path';
+import fs from 'fs';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
@@ -12,6 +14,9 @@ import { setupSocketIO } from './sockets';
 
 const app = express();
 const isVercelRuntime = process.env.VERCEL === '1' || Boolean(process.env.VERCEL_URL);
+
+const WEB_OUT_DIR = path.resolve(__dirname, '../../web/out');
+const hasFrontendBuild = fs.existsSync(path.join(WEB_OUT_DIR, 'index.html'));
 
 let server: http.Server | null = null;
 let io: ReturnType<typeof setupSocketIO> | null = null;
@@ -39,6 +44,9 @@ app.use(cookieParser());
 app.use(globalLimiter);
 
 app.get('/', (_req, res) => {
+  if (hasFrontendBuild) {
+    return res.sendFile(path.join(WEB_OUT_DIR, 'index.html'));
+  }
   res.json({
     success: true,
     name: 'ChatSphere API',
@@ -54,6 +62,21 @@ app.get('/', (_req, res) => {
 });
 
 app.use('/api', apiRoutes);
+
+if (hasFrontendBuild) {
+  app.use(
+    express.static(WEB_OUT_DIR, {
+      extensions: ['html'],
+      index: 'index.html',
+      maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
+    })
+  );
+
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' || req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(WEB_OUT_DIR, 'index.html'));
+  });
+}
 
 app.use(errorHandler);
 

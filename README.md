@@ -186,17 +186,13 @@ Set `NODE_ENV=production`, strong `JWT_*` secrets, and `COOKIE_SECURE=true` (HTT
 
 ### Option B — Render (blueprint included)
 
-`render.yaml` provisions a PostgreSQL database plus two web services (API + Next.js). After the first deploy:
+`render.yaml` provisions a PostgreSQL database plus a single web service that serves both the API and the exported Next.js frontend on one origin (cookies/CORS just work). After the first deploy:
 
-1. Create a **migration worker** or run once from the shell:
-
-   ```bash
-   npx prisma migrate deploy --schema apps/server/prisma/schema.prisma
-   ```
-
-   The API service also runs migrations on boot, so the first container start applies them automatically.
+1. The API runs `prisma migrate deploy` automatically on boot, so the first container start applies migrations against the production database.
 2. Seed demo accounts: `DATABASE_URL=<production-db-url> npm run db:seed`.
 3. Set `SMTP_*` and `CLOUDINARY_*` env vars to enable email and real media uploads.
+
+If you want the frontend and API on separate origins instead, use two services and set `NEXT_PUBLIC_API_URL` / `NEXT_PUBLIC_SOCKET_URL` at build time.
 
 ### Checklist for any platform
 

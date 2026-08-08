@@ -1,12 +1,12 @@
 services:
   - type: web
-    name: chatsphere-api
-    env: docker
-    dockerfilePath: apps/server/Dockerfile
-    dockerContext: .
-    plan: free
+    name: chatsphere
+    env: node
     region: oregon
+    plan: free
     branch: main
+    buildCommand: npm install; npm run build
+    startCommand: npm run start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
@@ -25,10 +25,6 @@ services:
         value: "15m"
       - key: JWT_REFRESH_EXPIRES
         value: "7d"
-      - key: CLIENT_URL
-        value: "https://chatsphere-web.onrender.com"
-      - key: FRONTEND_URL
-        value: "https://chatsphere-web.onrender.com"
       - key: COOKIE_SECURE
         value: "true"
       - key: SMTP_HOST
@@ -49,27 +45,6 @@ services:
         value: ""
       - key: CLOUDINARY_API_SECRET
         value: ""
-
-  - type: web
-    name: chatsphere-web
-    env: docker
-    dockerfilePath: apps/web/Dockerfile
-    dockerContext: .
-    plan: free
-    region: oregon
-    branch: main
-    dockerBuildArgs:
-      - name: NEXT_PUBLIC_API_URL
-        value: "https://chatsphere-ootu.onrender.com/api"
-      - name: NEXT_PUBLIC_SOCKET_URL
-        value: "https://chatsphere-ootu.onrender.com"
-    envVars:
-      - key: NODE_ENV
-        value: "production"
-      - key: NEXT_PUBLIC_API_URL
-        value: "https://chatsphere-ootu.onrender.com/api"
-      - key: NEXT_PUBLIC_SOCKET_URL
-        value: "https://chatsphere-ootu.onrender.com"
 
 databases:
   - name: chatsphere-db
