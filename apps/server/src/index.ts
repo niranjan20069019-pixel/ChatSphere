@@ -25,6 +25,20 @@ app.set('trust proxy', 1);
 
 app.use(
   helmet({
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrcAttr: ["'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com'],
+        mediaSrc: ["'self'", 'blob:', 'data:'],
+        connectSrc: ["'self'", 'ws:', 'wss:', 'https://res.cloudinary.com'],
+        fontSrc: ["'self'", 'data:'],
+        workerSrc: ["'self'", 'blob:'],
+      },
+    },
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
 );
