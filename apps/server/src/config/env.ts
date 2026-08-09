@@ -20,6 +20,12 @@ const clientUrl =
 
 const jwtAccessSecret = process.env.JWT_ACCESS_SECRET || DEFAULT_ACCESS;
 const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || DEFAULT_REFRESH;
+const databaseUrl =
+  process.env.DATABASE_URL ||
+  process.env.RENDER_DATABASE_URL ||
+  process.env.POSTGRES_URL ||
+  process.env.DATABASE_URI ||
+  '';
 
 if (process.env.NODE_ENV === 'production') {
   if (
@@ -37,7 +43,7 @@ if (process.env.NODE_ENV === 'production') {
 export const env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: parseInt(process.env.PORT || '4000', 10),
-  DATABASE_URL: process.env.DATABASE_URL || '',
+  DATABASE_URL: databaseUrl,
   JWT_ACCESS_SECRET: jwtAccessSecret,
   JWT_REFRESH_SECRET: jwtRefreshSecret,
   JWT_ACCESS_EXPIRES: process.env.JWT_ACCESS_EXPIRES || '15m',
