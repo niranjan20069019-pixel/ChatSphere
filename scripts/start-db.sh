@@ -6,6 +6,13 @@ export PGDATA="${ROOT}/.pgdata"
 export PGPORT="${PGPORT:-5433}"
 export PATH="/usr/lib/postgresql/16/bin:${PATH}"
 
+if ! command -v initdb >/dev/null 2>&1 || ! command -v pg_ctl >/dev/null 2>&1; then
+  echo "PostgreSQL binaries not found. Skipping local database start."
+  echo "If DATABASE_URL does not point at a running database, run PostgreSQL yourself"
+  echo "(e.g. 'docker compose up -d postgres') before starting the dev servers."
+  exit 0
+fi
+
 if [ ! -d "$PGDATA" ]; then
   echo "Initializing local PostgreSQL in .pgdata ..."
   initdb -D "$PGDATA" --auth=trust --username=chatsphere

@@ -8,8 +8,8 @@
     "npm": ">=10.0.0"
   },
   "scripts": {
-    "dev": "concurrently \"npm run dev -w @chatsphere/server\" \"npm run dev -w @chatsphere/web\"",
-    "dev:server": "npm run dev -w @chatsphere/server",
+    "dev": "npm run db:start && concurrently \"npm run dev -w @chatsphere/server\" \"npm run dev -w @chatsphere/web\"",
+    "dev:server": "npm run db:start && npm run dev -w @chatsphere/server",
     "dev:web": "npm run dev -w @chatsphere/web",
     "start": "npm run start -w @chatsphere/server",
     "build": "npm run build -w @chatsphere/server && npm run build -w @chatsphere/web",
