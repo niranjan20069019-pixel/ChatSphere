@@ -17,6 +17,10 @@ function getTransporter() {
   return transporter;
 }
 
+export function isEmailConfigured(): boolean {
+  return Boolean(env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS);
+}
+
 async function getDevTransporter() {
   if (devTransporter) return devTransporter;
   const testAccount = await nodemailer.createTestAccount();
@@ -99,14 +103,30 @@ export async function sendPasswordResetEmail(email: string, resetUrl: string): P
 async function sendEmail(to: string, subject: string, html: string) {
   const t = getTransporter();
   if (t) {
-    const info = await t.sendMail({ from: env.EMAIL_FROM, to, subject, html });
-    logger.info(`[EMAIL] Sent to ${to} | Subject: "${subject}" | Id: ${info.messageId}`);
+    try {
+      const info = await t.sendMail({ from: env.EMAIL_FROM, to, subject, html });
+      logger.info(`[EMAIL] Sent to ${to} | Subject: "${subject}" | Id: ${info.messageId}`);
+    } catch (err) {
+      logger.error(`[EMAIL] Failed to send to ${to} | Subject: "${subject}" | ${(err as Error).message}`);
+    }
     return;
   }
-  const dev = await getDevTransporter();
-  const info = await dev.sendMail({ from: env.EMAIL_FROM, to, subject, html });
-  const previewUrl = nodemailer.getTestMessageUrl(info);
-  logger.info(`[EMAIL DEV] To: ${to} | Subject: "${subject}" | Preview: ${previewUrl}`);
+
+  if (env.NODE_ENV === 'production') {
+    logger.warn(`[EMAIL] SMTP not configured — email NOT delivered. To: ${to} | Subject: "${subject}"`);
+    logger.info(`[EMAIL] Would have sent:\n${html}`);
+    return;
+  }
+
+  try {
+    const dev = await getDevTransporter();
+    const info = await dev.sendMail({ from: env.EMAIL_FROM, to, subject, html });
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    logger.info(`[EMAIL DEV] To: ${to} | Subject: "${subject}" | Preview: ${previewUrl}`);
+  } catch (err) {
+    logger.error(`[EMAIL DEV] Ethereal send failed for ${to}: ${(err as Error).message}`);
+    logger.info(`[EMAIL DEV] Fallback — would have sent:\n${html}`);
+  }
 }
 
 export async function verifySmtpConnection(): Promise<void> {

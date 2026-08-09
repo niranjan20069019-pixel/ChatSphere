@@ -9,7 +9,8 @@ import {
   verifyRefreshToken,
   getRefreshExpiryDate,
 } from '../utils/jwt';
-import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email.service';
+import { sendVerificationEmail, sendPasswordResetEmail, isEmailConfigured } from '../services/email.service';
+import { logger } from '../config/logger';
 import { env } from '../config/env';
 import { param } from '../utils/params';
 import { generateSecureToken, hashToken } from '../utils/tokens';
@@ -105,7 +106,8 @@ export const register = asyncHandler(async (req: AuthRequest, res: Response) => 
   }
 
   const passwordHash = await hashPassword(password);
-  const rawVerifyToken = generateSecureToken();
+  const emailConfigured = isEmailConfigured();
+  const rawVerifyToken = emailConfigured ? generateSecureToken() : null;
 
   const user = await prisma.user.create({
     data: {
@@ -113,19 +115,31 @@ export const register = asyncHandler(async (req: AuthRequest, res: Response) => 
       email: email.toLowerCase(),
       passwordHash,
       displayName: displayName || username,
-      emailVerifyToken: hashToken(rawVerifyToken),
-      emailVerifyExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      ...(rawVerifyToken
+        ? {
+            emailVerifyToken: hashToken(rawVerifyToken),
+            emailVerifyExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          }
+        : { emailVerified: true }),
     },
     select: userSelect,
   });
 
-  const verificationUrl = `${env.FRONTEND_URL}/verify-email?token=${rawVerifyToken}`;
-  await sendVerificationEmail(user.email, verificationUrl);
+  if (rawVerifyToken) {
+    const verificationUrl = `${env.FRONTEND_URL}/verify-email?token=${rawVerifyToken}`;
+    try {
+      await sendVerificationEmail(user.email, verificationUrl);
+    } catch (err) {
+      logger.error(`[AUTH] Failed to send verification email to ${user.email}: ${(err as Error).message}`);
+    }
+  }
   await issueSession(res, user, req);
 
   res.status(201).json({
     success: true,
-    message: 'Registration successful. Please verify your email.',
+    message: emailConfigured
+      ? 'Registration successful. Please verify your email.'
+      : 'Registration successful.',
     data: { user },
   });
 });

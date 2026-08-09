@@ -26,8 +26,8 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await register(form);
-      toast.success('Account created! Check your email to verify.');
+      const message = await register(form);
+      toast.success(message);
       router.push('/dashboard');
     } catch (err: unknown) {
       const message =

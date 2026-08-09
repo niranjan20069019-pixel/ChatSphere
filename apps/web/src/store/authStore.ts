@@ -15,7 +15,7 @@ interface AuthState {
     email: string;
     password: string;
     displayName?: string;
-  }) => Promise<void>;
+  }) => Promise<string>;
   logout: () => Promise<void>;
   fetchMe: () => Promise<void>;
   initialize: () => Promise<void>;
@@ -42,6 +42,7 @@ export const useAuthStore = create<AuthState>()(
         const { user } = res.data.data;
         set({ user, isAuthenticated: true, isLoading: false });
         connectSocket();
+        return res.data.message as string;
       },
 
       logout: async () => {
