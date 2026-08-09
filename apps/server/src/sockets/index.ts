@@ -85,7 +85,11 @@ async function requireGroupMember(groupId: string, userId: string) {
 export const setupSocketIO = (httpServer: HttpServer): Server => {
   const io = new Server(httpServer, {
     cors: {
-      origin: env.corsOrigins,
+      origin: (origin, callback) => {
+        if (!origin || env.corsOrigins.includes(origin)) return callback(null, true);
+        if (origin.endsWith('.onrender.com')) return callback(null, true);
+        callback(new Error('Not allowed by CORS'));
+      },
       credentials: true,
     },
     pingTimeout: 60000,

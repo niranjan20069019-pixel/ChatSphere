@@ -45,7 +45,12 @@ app.use(
 
 app.use(
   cors({
-    origin: env.corsOrigins,
+    origin: (origin, callback) => {
+      if (!origin || env.corsOrigins.includes(origin)) return callback(null, true);
+      // Allow any Render-hosted frontend (single-origin or separate web service).
+      if (origin.endsWith('.onrender.com')) return callback(null, true);
+      callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -110,6 +115,14 @@ if (!isVercelRuntime) {
     logger.info(`ChatSphere API running on port ${env.PORT} [${env.NODE_ENV}] on ${host}`);
     logger.info(`Client URL: ${env.CLIENT_URL}`);
   });
+
+  if (env.NODE_ENV === 'production' && !env.DATABASE_URL) {
+    logger.error(
+      'DATABASE_URL is NOT set. Every database operation will fail. ' +
+        'Set DATABASE_URL to your PostgreSQL connection string in the Render dashboard ' +
+        '(Services > chatsphere > Environment) and redeploy.'
+    );
+  }
 
   const shutdown = (signal: string) => {
     logger.info(`Received ${signal}, shutting down gracefully...`);

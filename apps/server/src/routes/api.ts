@@ -7,13 +7,24 @@ import groupsRoutes from './groups.routes';
 import notificationsRoutes from './notifications.routes';
 import adminRoutes from './admin.routes';
 import uploadRoutes from './upload.routes';
+import { prisma } from '../config/database';
 
 const router = Router();
 
-router.get('/health', (_req, res) => {
-  res.json({
-    success: true,
-    message: 'ChatSphere API is healthy',
+router.get('/health', async (_req, res) => {
+  let database = 'ok';
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+  } catch {
+    database = 'down';
+  }
+  res.status(database === 'ok' ? 200 : 503).json({
+    success: database === 'ok',
+    message:
+      database === 'ok'
+        ? 'ChatSphere API is healthy'
+        : 'Database unreachable — check DATABASE_URL',
+    database,
     timestamp: new Date().toISOString(),
   });
 });

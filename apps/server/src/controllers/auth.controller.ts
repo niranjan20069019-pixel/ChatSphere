@@ -160,7 +160,11 @@ export const login = asyncHandler(async (req: AuthRequest, res: Response) => {
 
   if (user.status === 'BANNED') throw new AppError('Account banned', 403, 'BANNED');
   if (user.status === 'SUSPENDED') throw new AppError('Account suspended', 403, 'SUSPENDED');
-  if (!user.emailVerified) throw new AppError('Please verify your email before logging in', 403, 'EMAIL_NOT_VERIFIED');
+  // Only require email verification when email is actually configured — otherwise the
+  // user could never receive a verification link and would be locked out forever.
+  if (!user.emailVerified && isEmailConfigured()) {
+    throw new AppError('Please verify your email before logging in', 403, 'EMAIL_NOT_VERIFIED');
+  }
 
   await issueSession(res, user, req);
 

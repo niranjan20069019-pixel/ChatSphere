@@ -1,6 +1,18 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+
+// NEXT_PUBLIC_* values are baked in at build time. If a build (CI, Docker, Render)
+// happened to bake a localhost URL, using it from a deployed page would break every
+// API call. When the page is served from a non-local host, fall back to the
+// same-origin /api path instead.
+const API_URL =
+  typeof window !== 'undefined' &&
+  window.location.hostname !== 'localhost' &&
+  window.location.hostname !== '127.0.0.1' &&
+  /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/.test(rawApiUrl)
+    ? '/api'
+    : rawApiUrl || '/api';
 
 export const api = axios.create({
   baseURL: API_URL,
