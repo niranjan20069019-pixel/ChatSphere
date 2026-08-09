@@ -21,7 +21,8 @@ services:
         fromDatabase:
           name: chatsphere-db
           property: connectionString
-      # DATABASE_URL is injected from the managed Render database above.
+      # Render supplies the internal managed database URL here at deploy time.
+      # This URL is not stored in the repository or in .env.
       - key: JWT_ACCESS_SECRET
         generateValue: true
       - key: JWT_REFRESH_SECRET

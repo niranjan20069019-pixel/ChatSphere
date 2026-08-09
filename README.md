@@ -189,9 +189,10 @@ Set `NODE_ENV=production`, strong `JWT_*` secrets, and `COOKIE_SECURE=true` (HTT
 `render.yaml` provisions a PostgreSQL database plus a single web service that serves both the API and the exported Next.js frontend on one origin (cookies/CORS just work). After the first deploy:
 
 1. The API runs `prisma migrate deploy` automatically on boot, so the first container start applies migrations against the production database.
-2. If you deploy from the Render dashboard manually instead of using the blueprint, set `DATABASE_URL` in the service Environment to the Render database connection string.
-3. Seed demo accounts: `DATABASE_URL=<production-db-url> npm run db:seed`.
-4. Set `SMTP_*` and `CLOUDINARY_*` env vars to enable email and real media uploads.
+2. If you deploy from the Render dashboard manually instead of using the blueprint, set `DATABASE_URL` in the service Environment to the Render-managed database connection string (internal URL).
+3. The internal database URL is not stored in this repository or in `.env`; Render injects it automatically for services configured with `fromDatabase`.
+4. Seed demo accounts: `DATABASE_URL=<production-db-url> npm run db:seed`.
+5. Set `SMTP_*` and `CLOUDINARY_*` env vars to enable email and real media uploads.
 
 If you want the frontend and API on separate origins instead, use two services and set `NEXT_PUBLIC_API_URL` / `NEXT_PUBLIC_SOCKET_URL` at build time.
 
